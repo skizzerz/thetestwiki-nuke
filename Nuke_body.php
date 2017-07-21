@@ -50,6 +50,14 @@ class SpecialNuke extends SpecialPage {
 				$pages = $req->getArray( 'pages' );
 
 				if ( $pages ) {
+					// BEGIN CODE EDIT -Skizzerz
+					global $wgNukeLimitedMaxPages;
+					if( !$this->getUser()->isAllowed( 'nuke' ) && count( $pages ) > $wgNukeLimitedMaxPages ) {
+						$out->addWikiMsg( 'nuke-limited', $wgNukeLimitedMaxPages );
+						$this->listForm( $target, $reason, $req->getInt( 'limit', 500 ) );
+						return;
+					}
+					// END CODE EDIT
 					$this->doDelete( $pages, $reason );
 
 					return;
@@ -66,6 +74,12 @@ class SpecialNuke extends SpecialPage {
 		}
 	}
 
+	// BEGIN CODE EDIT -Skizzerz
+	public function userCanExecute( User $user ) {
+		return $user->isAllowed( 'nuke' ) || $user->isAllowed( 'nuke-limited' );
+	}
+	// END CODE EDIT
+	
 	/**
 	 * Prompt for a username or IP address.
 	 *
